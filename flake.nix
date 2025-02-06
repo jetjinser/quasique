@@ -31,6 +31,8 @@
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
+            # TODO: Delete it. Leave a warning to users that QQ are not free;
+            # In other words, end users must explicitly agree to use the unfree software (QQ).
             config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "qq" ];
             overlays = [ self.overlays.default ];
           };
