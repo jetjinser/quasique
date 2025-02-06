@@ -1,0 +1,14 @@
+diff --git a/src/shell/base.ts b/src/shell/base.ts
+index 3430b4f0..a6e0eea3 100644
+--- a/src/shell/base.ts
++++ b/src/shell/base.ts
+@@ -263,7 +263,8 @@ async function initializeSession(
+ 
+ export async function NCoreInitShell() {
+     console.log('NapCat Shell App Loading...');
+-    const pathWrapper = new NapCatPathWrapper();
++    const mainPath = process.env.NAPCAT_MAIN_PATH || dirname(fileURLToPath(import.meta.url));
++    const pathWrapper = new NapCatPathWrapper(mainPath);
+     const logger = new LogWrapper(pathWrapper.logsPath);
+     handleUncaughtExceptions(logger);
+     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
