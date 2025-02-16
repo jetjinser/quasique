@@ -35,8 +35,14 @@ in
       default = "/var/lib/quasique";
       description = "The quasique mainPath, where store logs, cache and config.";
     };
+    homePath = lib.mkOption {
+      type = types.path;
+      default = "${cfg.mainPath}/home";
+      description = "The quasique mainPath, where store logs, cache and config.";
+    };
     qq = lib.mkOption {
-      type = types.str;
+      type = with types; nullOr str;
+      default = null;
       description = "The QQ number for quick login.";
     };
 
@@ -77,6 +83,7 @@ in
           ${xvfb-run} -a ${quasique} ${flag}
         '';
       environment = {
+        HOME = cfg.homePath;
         NAPCAT_MAIN_PATH = cfg.mainPath;
       };
       serviceConfig = {
