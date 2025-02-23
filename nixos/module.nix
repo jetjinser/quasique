@@ -45,6 +45,11 @@ in
       default = null;
       description = "The QQ number for quick login.";
     };
+    qqPath = lib.mkOption {
+      type = with types; nullOr path;
+      default = null;
+      description = "The path to file contains QQ number for quick login.";
+    };
 
     port = lib.mkOption {
       type = types.port;
@@ -56,6 +61,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    warnings = lib.optional (
+      !(builtins.isNull cfg.qq) -> !(builtins.isNull cfg.qqPath)
+    ) "If `services.quasique.qq` is set then `services.quasique.qqPath` will be ignored.";
+
     users.users = lib.mkIf (cfg.user == defaultUser) {
       ${defaultUser} = {
         inherit (cfg) group;
@@ -77,7 +86,11 @@ in
         let
           quasique = lib.getExe' cfg.package "quasique";
           xvfb-run = lib.getExe' pkgs.xvfb-run "xvfb-run";
-          flag = if (cfg.qq != null) then "--qq ${cfg.qq}" else "";
+          flag =
+            if (cfg.qq != null) then
+              "--qq ${cfg.qq}"
+            else
+              (if (cfg.qqPath != null) then "--qq $(cat ${cfg.qqPath})" else "");
         in
         ''
           ${xvfb-run} -a ${quasique} ${flag}
