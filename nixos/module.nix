@@ -99,6 +99,7 @@ in
       };
       serviceConfig = {
         DynamicUser = true;
+        PrivateTmp = true;
         StateDirectory = "quasique";
         RuntimeDirectory = "quasique";
         LogsDirectory = "quasique";
