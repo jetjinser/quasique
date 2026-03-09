@@ -14,9 +14,10 @@ in
 {
   options.services.quasique = {
     enable = lib.mkEnableOption "Whether to enable quasique";
-    package = lib.mkOption {
-      type = types.package;
-      default = pkgs.quasique;
+
+    package = lib.mkPackageOption pkgs "quasique" { };
+    ffmpegPackage = lib.mkPackageOption pkgs "ffmpeg-headless" {
+      example = "ffmpeg-full";
     };
 
     user = lib.mkOption {
@@ -81,6 +82,8 @@ in
       description = "QuasiQue service";
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
+
+      path = [ cfg.ffmpegPackage ];
 
       script =
         let
