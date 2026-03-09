@@ -31,16 +31,12 @@ in
       description = "Group under which quasique runs.";
     };
 
-    mainPath = lib.mkOption {
+    workdir = lib.mkOption {
       type = types.path;
       default = "/var/lib/quasique";
-      description = "The quasique mainPath, where store logs, cache and config.";
+      description = "The quasique working directory, where store logs, cache and config.";
     };
-    homePath = lib.mkOption {
-      type = types.path;
-      default = "${cfg.mainPath}/home";
-      description = "The quasique mainPath, where store logs, cache and config.";
-    };
+
     qq = lib.mkOption {
       type = with types; nullOr str;
       default = null;
@@ -99,8 +95,7 @@ in
           ${xvfb-run} -a ${quasique} ${flag}
         '';
       environment = {
-        HOME = cfg.homePath;
-        NAPCAT_MAIN_PATH = cfg.mainPath;
+        NAPCAT_WORKDIR = cfg.workdir;
       };
       serviceConfig = {
         DynamicUser = true;
@@ -108,7 +103,7 @@ in
         RuntimeDirectory = "quasique";
         LogsDirectory = "quasique";
         Restart = "on-failure";
-        WorkingDirectory = cfg.mainPath;
+        WorkingDirectory = cfg.workdir;
 
         User = cfg.user;
         Group = cfg.group;
