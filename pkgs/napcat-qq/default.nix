@@ -1,85 +1,90 @@
 {
-  lib,
   stdenv,
   fetchFromGitHub,
-  buildNpmPackage,
   nodejs_22,
+  pnpmConfigHook,
+  pnpm_9,
+  fetchPnpmDeps,
 }:
 
 let
-  inherit (stdenv.hostPlatform.uname) system;
-  target_platform = lib.toLower system;
-
+  pnpm = pnpm_9;
   nodejs = nodejs_22;
 
-  version = "4.5.14";
+  version = "4.17.46";
   src = fetchFromGitHub {
     owner = "NapNeko";
     repo = "NapCatQQ";
     rev = "v${version}";
-    hash = "sha256-h1WbW8Rv/UOl/y4htrI54RWNOn/Zyvdw/113DSq+n5s=";
-  };
-
-  webui = buildNpmPackage {
-    inherit version nodejs;
-    src = "${src}/napcat.webui";
-    pname = "nap-cat-qq-webui";
-
-    npmDepsHash = "sha256-tk23rJtFmLZ+ag5ZMlWFx/tXxoTiM4LGSTEv5MUxeTs=";
-
-    postPatch = ''
-      cp ${./package-lock.webui.json} ./package-lock.json
-    '';
-
-    installPhase = ''
-      runHook preInstall
-      mkdir $out
-      cp -r dist/* $out
-      runHook postInstall
-    '';
+    hash = "sha256-pIGXpHcxU7RiVQhPBR+OJEbufus+JkLSBPGpU3079FU=";
   };
 in
-buildNpmPackage {
-  inherit version src nodejs;
-  pname = "nap-cat-qq";
+stdenv.mkDerivation (finalAttrs: {
+  pname = "napcat-qq-shell";
+  inherit version src;
+  # pnpmWorkspaces = [
+  #   "napcat-shell"
+  #   "napcat-webui-frontend"
+  #   "napcat-plugin-builtin"
+  # ];
 
-  npmDepsHash = "sha256-wkFt3WjBeaoPS7K+J4YluTiR/FEx5HejIJKTjyNSx3s=";
+  nativeBuildInputs = [
+    nodejs
+    pnpmConfigHook
+    pnpm
+  ];
 
-  patches = [ ./configBase.patch ];
+  pnpmDeps = fetchPnpmDeps {
+    inherit (finalAttrs)
+      pname
+      version
+      src
+      # pnpmWorkspaces
+      ;
+    inherit pnpm;
+    fetcherVersion = 3;
+    # hash = "sha256-advQVEgSolQFfdwnzfq4V6moHJWE9Ev1MfiSoOEVM6Y=";
+    hash = "sha256-d44UNv8rPIXjCteeu2fsZEPumHsuilbe0nKL9ymzfbM=";
+  };
 
-  postPatch = ''
-    cp ${./package-lock.shell.json} ./package-lock.json
+  # checkPhase = ''
+  #   runHook preCheck
+  #
+  #   pnpm run typecheck
+  #   pnpm test
+  #
+  #   runHook postCheck
+  # '';
 
-    sed -i 's/npm run build:webui && //g'  package.json
+  buildPhase = ''
+    runHook preBuild
 
-    mkdir napcat.webui/dist
-    cp -r ${webui}/* napcat.webui/dist
+    pnpm --filter napcat-webui-frontend run build
+    pnpm run build:shell
+    pnpm --filter napcat-plugin-builtin run build
+
+    runHook postBuild
   '';
 
-  npmBuildScript = "build:shell";
-  buildInputs = [ ];
-
-  preInstall = ''
-    cd dist
-    cp ../package-lock.json .
-    npm ci --omit=dev
-    cd ..
-  '';
-
+  # installPhase = ''
+  #   runHook preInstall
+  #   pnpm --filter napcat-shell deploy --prod --offline --ignore-scripts $out
+  #   runHook postInstall
+  # '';
+  dontCheckForBrokenSymlinks = true;
   installPhase = ''
     runHook preInstall
-    mkdir $out
-    cp -r dist/* $out
+
+    rm -r node_modules
+
+    pushd packages/napcat-shell/dist
+    CI=true pnpm install --offline --prod --ignore-scripts --filter napcat-shell
+    mkdir -p $out
+    cp -r . $out/
+    popd
+
+    cp -r node_modules $out/
+
     runHook postInstall
   '';
-
-  env.NAPCAT_BUILDSYS = target_platform;
-
-  meta = with lib; {
-    description = "现代化的基于 NTQQ 的 Bot 协议端实现 ";
-    homepage = "https://github.com/NapNeko/NapCatQQ";
-    license = licenses.mit;
-    mainProgram = "nap-cat-qq";
-    platforms = platforms.all;
-  };
-}
+})

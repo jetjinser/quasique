@@ -3,7 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
 
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
@@ -26,14 +29,11 @@
           ...
         }:
         let
-          inherit (pkgs) lib callPackage;
+          inherit (pkgs) callPackage;
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
-            # TODO: Delete it. Leave a warning to users that QQ are not free;
-            # In other words, end users must explicitly agree to use the unfree software (QQ).
-            config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "qq" ];
             overlays = [ self.overlays.default ];
           };
           treefmt.config = {
