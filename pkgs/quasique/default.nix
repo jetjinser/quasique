@@ -6,6 +6,7 @@
   libssh2,
   libGL,
   libuuid,
+  stdenv,
 }:
 
 let
@@ -41,6 +42,7 @@ qq.overrideAttrs (_prev: {
           lib.makeLibraryPath [
             libGL
             libuuid
+            stdenv.cc.cc.lib
           ]
         }" \
         --add-flags "--no-sandbox" \
