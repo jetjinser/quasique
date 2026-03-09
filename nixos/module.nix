@@ -96,15 +96,20 @@ in
         '';
       environment = {
         NAPCAT_WORKDIR = cfg.workdir;
+        HOME = "$RUNTIME_DIRECTORY";
       };
       serviceConfig = {
         DynamicUser = true;
         PrivateTmp = true;
+        ProtectSystem = true;
+        ProtectHome = true;
+
         StateDirectory = "quasique";
         RuntimeDirectory = "quasique";
         LogsDirectory = "quasique";
-        Restart = "on-failure";
         WorkingDirectory = cfg.workdir;
+
+        Restart = "on-failure";
 
         User = cfg.user;
         Group = cfg.group;
