@@ -59,7 +59,7 @@ in
 
   config = lib.mkIf cfg.enable {
     warnings = lib.optional (
-      !(builtins.isNull cfg.qq) -> !(builtins.isNull cfg.qqPath)
+      cfg.qq != null && cfg.qqPath != null
     ) "If `services.quasique.qq` is set then `services.quasique.qqPath` will be ignored.";
 
     users.users = lib.mkIf (cfg.user == defaultUser) {

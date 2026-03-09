@@ -1,5 +1,6 @@
 {
   stdenv,
+  lib,
   fetchFromGitHub,
   nodejs_22,
   pnpmConfigHook,
@@ -87,4 +88,13 @@ stdenv.mkDerivation (finalAttrs: {
 
     runHook postInstall
   '';
+
+  meta = {
+    description = "现代化的基于 NTQQ 的 Bot 协议端实现";
+    homepage = "https://github.com/NapNeko/NapCatQQ";
+    license = lib.licenses.mit;
+    # FIXME(jinser): no main program actually, or somehow provide a wrapper?
+    mainProgram = "napcat.mjs";
+    platforms = lib.platforms.all;
+  };
 })
