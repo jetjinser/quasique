@@ -12,12 +12,12 @@ let
   pnpm = pnpm_9;
   nodejs = nodejs_22;
 
-  version = "4.17.46";
+  version = "4.18.1";
   src = fetchFromGitHub {
     owner = "NapNeko";
     repo = "NapCatQQ";
     rev = "v${version}";
-    hash = "sha256-pIGXpHcxU7RiVQhPBR+OJEbufus+JkLSBPGpU3079FU=";
+    hash = "sha256-KdDxTyiSk7LQjJQmFRN7ydovYFsTcIqwXL3/NwwVCCQ=";
   };
 in
 stdenv.mkDerivation (finalAttrs: {
